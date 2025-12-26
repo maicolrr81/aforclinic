@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.post.mapper.PostMapper">
+
+    <resultMap id="post" type="Post">
+        <id     property="id"           column="id" />
+        <result property="type"         column="type" />
+        <result property="title"        column="title" />
+        <result property="content"      column="content" />
+        <result property="status"       column="status" />
+        <result property="createdAt"    column="created_at" />
+        <result property="createdBy"    column="created_by" />
+        <result property="modifiedAt"   column="modified_at" />
+        <result property="modifiedBy"   column="modified_by" />
+    </resultMap>
+    
+    <sql id="conditions">
+        <if test='search.type != null'>
+            and a.type = #{search.type}
+        </if>
+        <if test='search.startDate != null'>
+            and a.created_at <![CDATA[ >= ]]> #{search.startDate}
+        </if>
+        <if test='search.endDate != null'>
+            and a.created_at <![CDATA[ <= ]]> #{search.endDate}
+        </if>
+        <choose>
+            <when test='search.status != null'>
+                and a.status = #{search.status}
+            </when>
+            <otherwise>
+                and a.status != 'DELETED'
+            </otherwise>
+        </choose>
+        <if test='search.text != null and search.text.trim().length() > 0'>
+            and (
+                a.title like concat('%', #{search.text}, '%')
+            )
+        </if>
+    </sql>
+    
+    <select id="selectList" resultMap="post">
+        select a.id
+             , a.type
+             , a.title
+             , a.status
+             , a.created_at
+             , u1.nickname      as created_by
+             , a.modified_at
+             , u2.nickname      as modified_by
+          from post a
+     left join user u1
+            on u1.id = a.created_by
+     left join user u2
+            on u2.id = a.modified_by
+        <where>
+            <include refid="conditions" />
+        </where>
+      order by a.created_at desc
+        <if test='!paging.unpaged'>
+             limit #{paging.limit}
+            offset #{paging.offset}
+        </if>
+    </select>
+    
+    <select id="selectTotalCount" resultType="long">
+        select count(*)
+          from post a
+        <where>
+            <include refid="conditions" />
+        </where>
+    </select>
+    
+    <select id="selectById" resultMap="post">
+        select a.id
+             , a.type
+             , a.title
+             , a.content
+             , a.content_text
+             , a.status
+             , a.created_at
+             , u1.nickname      as created_by
+             , a.modified_at
+             , u2.nickname      as modified_by
+          from post a
+     left join user u1
+            on u1.id = a.created_by
+     left join user u2
+            on u2.id = a.modified_by
+         where a.id = #{id}
+    </select>
+        
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into post (
+            type
+          , title
+          , content
+          , content_text
+          , status
+          , created_by
+        ) values (
+            #{type}
+          , #{title}
+          , #{content}
+          , #{contentText}
+          , #{status}
+          , #{createdBy}
+        )
+    </insert>
+
+    <update id="update">
+        update post
+        <set>
+            <if test='title != null'>
+                title = #{title},
+            </if>
+            <if test='content != null'>
+                content = #{content},
+            </if>
+            <if test='contentText != null'>
+                content_text = #{contentText},
+            </if>
+            <if test='status != null'>
+                status = #{status},
+            </if>
+            modified_by = #{modifiedBy}
+        </set>
+         where id = #{id}
+    </update>
+    
+    <update id="deleteUpdate">
+        update post
+        <set>
+            status = #{status},
+            modified_by = #{modifiedBy}
+        </set>
+         where id = #{id}
+    </update>
+    
+    <delete id="delete">
+        delete from post where id = #{id}
+    </delete>
+
+</mapper>

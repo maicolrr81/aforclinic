@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.file.mapper.FileMetadataMapper">
+
+    <resultMap id="metadata" type="FileMetadata">
+        <id     property="id"           column="id" />
+        <result property="filename"     column="filename" />
+        <result property="path"         column="path" />
+        <result property="size"         column="size" />
+        <result property="createdAt"    column="created_at" />
+    </resultMap>
+
+    <select id="selectById" resultMap="metadata">
+        select f.id
+             , f.filename
+             , f.path
+             , f.size
+             , f.created_at
+          from file f
+         where f.id = #{id}
+    </select>
+    
+    <select id="selectList" resultMap="metadata">
+        select f.id
+             , f.filename
+             , f.path
+             , f.size
+             , f.created_at
+          from file f
+        <where>
+            <if test='search.filename != null and search.filename != ""'>
+                and f.filename like concat('%', #{search.filename}, '%')
+            </if>
+        </where>
+      order by f.created_at desc
+         limit #{paging.limit}
+        offset #{paging.offset}
+    </select>
+    
+    <select id="selectTotalCount">
+        select count(*)
+          from file f
+        <where>
+            <if test='search.filename != null and search.filename != ""'>
+                and f.filename like concat('%', #{search.filename}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert">
+        insert into file (
+            id
+          , filename
+          , path
+          , size
+        ) values (
+            #{id}
+          , #{filename}
+          , #{path}
+          , #{size}
+        )
+    </insert>
+    
+</mapper>

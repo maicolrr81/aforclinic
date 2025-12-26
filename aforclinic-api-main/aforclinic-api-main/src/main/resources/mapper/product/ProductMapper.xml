@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.product.mapper.ProductMapper">
+
+    <resultMap id="product" type="Product">
+        <id     property="id"               column="id" />
+        <result property="bundle"           column="is_bundle" />
+        <result property="name"             column="name" />
+        <result property="description"      column="description" />
+        <result property="imageId"          column="image_id" />    
+        <result property="adjustedPrice"    column="adjusted_price" />
+        <result property="discountedPrice"  column="discounted_price" />
+        <result property="status"           column="status" />
+        <result property="createdAt"        column="created_at" />
+        <result property="createdBy"        column="created_by" />
+        <result property="modifiedAt"       column="modified_at" />
+        <result property="modifiedBy"       column="modified_by" />
+        <collection property="categoryList" javaType="java.util.List" ofType="Category">
+            <id     property="id"    column="category_id" />
+            <result property="name"  column="category_name" />
+        </collection>
+    </resultMap>
+    
+    <sql id="conditions">
+        <if test="search.categoryId != null">
+            and b.category_id = #{search.categoryId}
+        </if>
+        <if test="search.bundle != null">
+            and a.is_bundle = #{search.bundle}
+        </if>
+        <if test='search.text != null and search.text.trim().length() > 0'>
+            and (
+                a.name like concat('%', #{search.text}, '%')
+             or a.description like concat('%', #{search.text}, '%')
+            )
+        </if>
+        <choose>
+            <when test="search.status != null">
+                and a.status = #{search.status}
+            </when>
+            <otherwise>
+                and (a.status is null or a.status != 'DELETED')
+            </otherwise>
+        </choose>
+        <if test='search.ids != null and search.ids.size() > 0'>
+            and a.id in
+            <foreach item="id" collection="search.ids" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </sql>
+    
+    <select id="selectList" resultMap="product">
+        select a.id
+             , a.is_bundle
+             , a.name
+             , a.description
+             , a.image_id
+             , a.adjusted_price
+             , a.discounted_price
+             , a.status
+             , a.created_at
+             , u1.nickname as created_by
+             , a.modified_at
+             , u2.nickname as modified_by
+             , b.category_id
+             , c.name as category_name
+        from (
+            select distinct a.*
+            from product a
+            <if test="search.categoryId != null">
+                inner join product_categories b on b.product_id = a.id
+                inner join category c on c.id = b.category_id
+                    and (c.status is null or c.status != 'DELETED')
+            </if>
+            <where>
+                <include refid="conditions" />
+            </where>            
+	        <choose>
+	        	<when test="search.categoryId != null">
+	        		order by b.display_order, a.created_at desc, c.display_order
+	        	</when>
+	        	<otherwise>
+	        		order by a.created_at desc
+	        	</otherwise>
+	        </choose>
+            <!-- 페이징O and (카테고리X or 패키지O or 검색어O) -->
+            <if test="!paging.unpaged">
+                limit #{paging.limit}
+                offset #{paging.offset}
+            </if>
+        ) a
+        left join product_categories b on b.product_id = a.id
+        left join category c on c.id = b.category_id
+            and (c.status is null or c.status != 'DELETED')
+        left join user u1 on u1.id = a.created_by
+        left join user u2 on u2.id = a.modified_by
+        <choose>
+        	<when test="search.categoryId != null">
+        		order by b.display_order, a.created_at desc, c.display_order
+        	</when>
+        	<otherwise>
+        		order by a.created_at desc
+        	</otherwise>
+        </choose>
+    </select>
+    
+    <select id="selectTotalCount">
+        select count(distinct a.id)
+        from product a
+        <if test="search.categoryId != null">
+            inner join product_categories b on b.product_id = a.id
+            inner join category c on c.id = b.category_id
+                and (c.status is null or c.status != 'DELETED')
+        </if>
+        <where>
+            <include refid="conditions" />
+        </where>
+    </select>
+    
+    <select id="selectById" resultMap="product">
+        select a.id
+             , b.category_id
+             , b.name           as category_name
+             , a.is_bundle
+             , a.name
+             , a.description
+             , a.image_id
+             , a.adjusted_price
+             , a.discounted_price
+             , a.status
+             , a.created_at
+             , u1.nickname as created_by
+             , a.modified_at
+             , u2.nickname as modified_by 
+        from product a
+            left join (
+                    select a.product_id, a.category_id, b.name, b.display_order, b.created_at
+                    from product_categories a
+                        inner join category b
+                            on (a.category_id = b.id)
+                    where b.status is null
+                        or b.status != 'DELETED'
+            ) b 
+                on (a.id = b.product_id)
+            left join user u1 
+                on u1.id = a.created_by
+            left join user u2
+                on u2.id = a.modified_by
+         where a.id = #{id}
+            and (a.status is null or a.status != 'DELETED')
+    </select>
+    
+    <select id="selectByName">
+        select count(*)
+        from product
+        where name = #{name}
+            and (status is null or status != 'DELETED')
+            <if test="id != null and id.trim().length() > 0">
+            and id != #{id}
+            </if>
+    </select>
+        
+    <select id="selectBundleProduct" resultMap="product">
+        select a.id
+             , a.name
+             , a.adjusted_price
+             , a.discounted_price
+        from product a
+            left join product_categories b
+                on (a.id = b.product_id)
+        where b.category_id = #{categoryId}
+            and a.is_bundle = false
+            and (a.status is null or a.status != 'DELETED')
+            <if test="searchText != null and searchText.trim().length() > 0">
+            	and a.name like concat('%', #{searchText}, '%')
+            </if>
+        order by b.display_order, a.created_at desc
+    </select>
+    
+    <select id="selectByIdList" resultMap="product">
+        select a.id
+             , a.name
+             , a.adjusted_price
+             , a.discounted_price
+        from product a
+        where 
+            a.is_bundle = false
+            and (a.status is null or a.status != 'DELETED')
+            <if test="idList != null and idList.size() > 0">
+                and a.id in            
+                <foreach collection="idList" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+    </select>
+    
+    <select id="selectEventProduct" resultMap="product">
+        select a.id
+             , a.name
+             , a.adjusted_price
+             , a.discounted_price
+         from product a
+            left join product_categories b
+                on (a.id = b.product_id)
+        <where>
+            (a.status is null or a.status != 'DELETED')
+            <if test="categoryId != null and categoryId.trim().length() > 0">
+                and b.category_id = #{categoryId}
+            </if>
+            <if test="searchText != null and searchText.trim().length() > 0">
+                and a.name like concat('%', #{searchText}, '%')
+            </if>
+        </where>
+        order by b.display_order, a.created_at desc       	
+    </select>
+   
+    <insert id="insert">
+        insert into product (
+            id
+            , is_bundle
+            , name
+            , description
+            , image_id
+            , adjusted_price
+            , discounted_price
+            , status
+            , created_by
+        ) values (
+            #{id}
+            , #{bundle}
+            , #{name}
+            , #{description}
+            , #{imageId}
+            , #{adjustedPrice}
+            , #{discountedPrice}
+            , #{status}
+            , #{createdBy}
+        )
+    </insert>
+    
+    <update id="update">
+        update product
+            set name = #{name},
+                description = #{description},
+                image_id = #{imageId},
+                adjusted_price = #{adjustedPrice},
+                discounted_price = #{discountedPrice},
+                modified_by = #{modifiedBy}
+        where id = #{id}
+    </update>
+
+    <!-- 번들에 포함되어 있는 상품입니다. product 삭제 불가 -->
+    <select id="hasBundle">
+        select count(*)
+        from product a
+            inner join product_bundle b on (a.id = b.bundle_id)
+        where (a.status is null or a.status != 'DELETED')
+            and b.product_id = #{id}
+    </select>
+    
+    <!-- 이벤트에 포함되어 있는 상품입니다. product 삭제 불가 -->
+    <select id="hasEvent">
+        select count(*)
+        from event a
+            inner join event_products b on (a.id = b.event_id)
+        where (a.status is null or a.status != 'DELETED')
+            and b.product_id = #{id}
+    </select>
+    
+    <!-- 카트 상품이 있을 경우. product, cart 모두 물리 삭제-->
+    <select id="hasCart">
+        select count(*)
+        from cart
+        where product_id = #{id}
+    </select>
+    
+    <!-- 카트에 담긴 상품 삭제 -->
+    <delete id="deleteCart">
+        delete from cart
+        where product_id = #{id}
+    </delete>
+    
+    <update id="updateStatus">
+        update product
+            set status = #{status},
+                modified_by = #{modifiedBy}
+        where id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.attachment.mapper.AttachmentMapper">
+
+    <resultMap id="attachment" type="Attachment">
+        <id     property="fileId"           column="file_id" />
+        <result property="filename"         column="filename" />
+        <result property="size"             column="size" />
+    </resultMap>
+    
+    <select id="selectList" resultMap="attachment">
+        select a.file_id
+             , f.filename
+             , f.size
+          from attachment a
+     left join file f
+            on f.id = a.file_id
+         where a.target_id = #{targetId}
+           and a.target_type = #{targetType}
+    </select>
+    
+    <insert id="insert">
+        insert into attachment (
+            target_id
+          , target_type
+          , file_id
+        ) values (
+            #{targetId}
+          , #{targetType}
+          , #{fileId}
+        )
+    </insert>
+    
+    <delete id="delete">
+        delete from attachment
+         where target_id = #{targetId}
+           and target_type = #{targetType}
+    </delete>
+
+</mapper>

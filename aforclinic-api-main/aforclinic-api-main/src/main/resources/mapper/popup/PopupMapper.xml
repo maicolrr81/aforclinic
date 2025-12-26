@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.popup.mapper.PopupMapper">
+
+    <resultMap id="popup" type="Popup">
+        <id     property="id"           column="id" />
+        <result property="type"         column="type" />
+        <result property="title"        column="title" />
+        <result property="imageId"      column="image_id" />
+        <result property="linkUri"      column="link_uri" />
+        <result property="startDate"    column="start_date" />
+        <result property="endDate"      column="end_date" />
+        <result property="positionTop"  column="position_top" />
+        <result property="positionLeft" column="position_left" />
+        <result property="displayOrder" column="display_order"/>
+        <result property="status"       column="status" />
+        <result property="createdAt"    column="created_at" />
+        <result property="createdBy"    column="created_by" />
+        <result property="modifiedAt"   column="modified_at" />
+        <result property="modifiedBy"   column="modified_by" />
+    </resultMap>
+    
+    <sql id="conditions">
+    
+        <!-- 팝업 유형으로 조회 -->
+        <if test='search.type != null'>
+            and a.type = #{search.type}
+        </if>
+    
+        <if test="search.title != null and search.title.trim().length() > 0">
+            and a.title like concat('%', #{search.title}, '%')
+        </if>
+        
+        <!-- 타입(진행상태)로 조회 -->
+        <if test='search.progressType != null'>
+            <choose>
+                <when test='"BEFORE".equals(search.progressType.name())'>
+                    and a.start_date <![CDATA[ > ]]> DATE(NOW())
+                </when>
+                <when test='"ONGOING".equals(search.progressType.name())'>
+                    and a.start_date <![CDATA[ <= ]]> DATE(NOW())
+                    and a.end_date <![CDATA[ >= ]]> DATE(NOW())
+                </when>
+                <when test='"ENDED".equals(search.progressType.name())'>
+                    and a.end_date <![CDATA[ < ]]> DATE(NOW())
+                </when>
+            </choose>
+        </if>
+        
+        <!-- 상태로 조회 -->
+        <choose>
+            <when test='search.status != null'>
+                and a.status = #{search.status}
+            </when>
+            <otherwise>
+                and (a.status is null or a.status != 'DELETED')
+            </otherwise>
+        </choose>
+    </sql>
+    
+    <select id="selectList" resultMap="popup">
+        select a.id
+             , a.type
+             , a.title
+             , a.image_id
+             , a.link_uri
+             , a.start_date
+             , a.end_date
+             , a.position_top
+             , a.position_left
+             , a.display_order
+             , a.status
+             , a.created_at
+             , u1.nickname      as created_by
+             , a.modified_at
+             , u2.nickname      as modified_by
+          from popup a
+     left join user u1
+            on u1.id = a.created_by
+     left join user u2
+            on u2.id = a.modified_by
+        <where>
+            <include refid="conditions" />
+        </where>
+        order by a.display_order, a.created_at desc
+        <if test="!paging.unpaged">
+            limit #{paging.limit}
+            offset #{paging.offset}
+        </if>
+    </select>
+    
+    <select id="selectTotalCount">
+        select count(*)
+          from popup a
+        <where>
+            <include refid="conditions" />
+        </where>
+    </select>
+    
+    <select id="selectById" resultMap="popup">
+        select a.id
+             , a.type
+             , a.position_top
+             , a.position_left
+             , a.title
+             , a.image_id
+             , a.link_uri
+             , a.start_date
+             , a.end_date
+             , a.display_order
+             , a.status
+             , a.created_at
+             , u1.nickname         as created_by
+             , a.modified_at
+             , u2.nickname         as modified_by
+          from popup a
+     left join user u1
+            on u1.id = a.created_by
+     left join user u2
+            on u2.id = a.modified_by
+        where a.id = #{id}
+    </select>
+    
+    <insert id="insert">
+        insert into popup (
+            id
+          , type
+          , position_top
+          , position_left
+          , title
+          , image_id
+          , link_uri
+          , start_date
+          , end_date
+          , display_order
+          , status
+          , created_by
+        ) values (
+            #{id}
+          , #{type}
+          , #{positionTop}
+          , #{positionLeft}
+          , #{title}
+          , #{imageId}
+          , #{linkUri}
+          , #{startDate}
+          , #{endDate}
+          , #{displayOrder}
+          , #{status}
+          , #{createdBy}
+        )
+    </insert>
+    
+    <update id="update">
+        update popup
+        <set>
+            <if test='title != null'>
+                title = #{title},
+            </if>
+            <if test='type != null'>
+                type = #{type},
+            </if>
+            <if test='positionTop != null'>
+                position_top = #{positionTop},            
+            </if>
+            <if test='positionLeft != null'>
+                position_left = #{positionLeft},           
+            </if>
+            <if test='imageId != null'>
+                image_id = #{imageId},
+            </if>
+            <if test='linkUri != null'>
+                link_uri = #{linkUri},
+            </if>
+            <if test='startDate != null'>
+                start_date = #{startDate},
+            </if>
+            <if test='endDate != null'>
+                end_date = #{endDate},
+            </if>
+            <if test='displayOrder != null'>
+                display_order = #{displayOrder},
+            </if>
+            <if test='status != null'>
+                status = #{status},
+            </if>
+            modified_by = #{modifiedBy}
+        </set>
+         where id = #{id}
+    </update>
+    
+    <update id="reorder">
+        update popup
+        set display_order = #{displayOrder}
+          , modified_by = #{modifiedBy}
+        where id = #{id}
+    </update>
+    
+</mapper>

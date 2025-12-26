@@ -1,0 +1,48 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css");
+
+:root {
+  --q-primary: #666666;
+  --q-secondary: #242424;
+}
+
+#__nuxt {
+  @apply h-full;
+}
+
+/* prose */
+.prose img {
+  @apply inline;
+}
+
+.prose p {
+  @apply min-h-7;
+}
+
+/* QTable */
+.q-table > thead > tr > th {
+  @apply font-bold;
+}
+
+.q-table__bottom--nodata {
+  @apply justify-center;
+}
+
+/* Tiptap */
+/* ProseMirror 기본 스타일 (에디터 내용 영역) */
+.tiptap {
+  @apply p-6 text-gray-700;
+}
+
+.prose :where(img):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  @apply my-0;
+}
+
+.tiptap:focus {
+  @apply outline-none ring-2 ring-blue-400;
+}
+
+.tiptap p.is-empty::before {
+  @apply text-gray-400 float-left pointer-events-none h-0;
+  content: attr(data-placeholder);
+}
+

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.custom.product.mapper.CustomProductMapper">
+
+    <resultMap id="product" type="CustomProduct">
+        <id     property="id" column="product_id" />
+        <result property="name" column="product_name" />
+        <result property="description" column="product_description" />
+        <result property="adjustedPrice" column="adjusted_price" />
+        <result property="discountedPrice" column="discounted_price" />
+        <association property="event" javaType="CustomEvent">
+            <id     property="id"       column="event_id" />
+            <result property="endDate"  column="event_end_date" />
+        </association>
+    </resultMap>
+    
+    <sql id="conditions">
+        <!-- 카테고리로 조회 -->
+        <if test='search.categoryId != null and search.categoryId.trim().length() > 0'>
+            and b.category_id = #{search.categoryId}
+        </if>
+        
+        <!-- 상품 식별자로 조회 -->
+        <if test='search.productIds != null and search.productIds.size() > 0'>
+            and a.product_id in
+            <foreach item="productId" collection="search.productIds" open="(" separator="," close=")">
+                #{productId}
+            </foreach>
+        </if>
+        
+        <!-- 검색어으로 조회 -->
+        <if test='search.text != null and search.text.trim().length() > 0'>
+            and a.product_name like concat('%', #{search.text}, '%')
+        </if>
+    </sql>
+    
+    <select id="selectList" resultMap="product">
+        select distinct
+               a.product_id
+             , a.product_name
+             , a.product_description
+             , a.adjusted_price
+             , a.discounted_price
+             , a.event_id
+             , a.event_end_date
+          from view_product a
+     left join product_categories b
+            on b.product_id = a.product_id
+        <where>
+            <include refid="conditions" />
+        </where>
+        <choose>
+            <when test='search.categoryId != null and search.categoryId.trim().length() > 0'>
+                order by b.display_order, a.product_name
+            </when>
+            <otherwise>
+                order by a.product_name
+            </otherwise>
+        </choose>
+    </select>
+
+</mapper>

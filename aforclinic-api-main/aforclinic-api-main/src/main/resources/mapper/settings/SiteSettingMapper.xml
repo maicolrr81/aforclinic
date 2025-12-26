@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.settings.mapper.SiteSettingMapper">
+
+    <resultMap id="setting" type="SiteSetting">
+        <id     property="key"          column="setting_key" />
+        <result property="value"        column="setting_value" />
+        <result property="createdAt"    column="created_at" />
+        <result property="createdBy"    column="created_by" />
+        <result property="modifiedAt"    column="modified_at" />
+        <result property="modifiedBy"    column="modified_by" />
+    </resultMap>
+    
+    <select id="selectList" resultMap="setting">
+        select a.setting_key
+             , a.setting_value
+          from site_settings a
+    </select>
+    
+    <select id="selectByKey" resultMap="setting">
+        select a.setting_key
+             , a.setting_value
+          from site_settings a
+         where a.key = #{key}
+    </select>
+    
+    <insert id="insert">
+        insert into site_settings (
+            setting_key
+          , setting_value
+          , created_by
+        ) values (
+            #{key}
+          , #{value}
+          , #{createdBy}
+        )
+    </insert>
+    
+    <update id="update">
+        update site_settings
+           set setting_value = #{value}
+             , modified_by = #{modifiedBy}
+         where setting_key = #{key}
+    </update>
+
+</mapper>

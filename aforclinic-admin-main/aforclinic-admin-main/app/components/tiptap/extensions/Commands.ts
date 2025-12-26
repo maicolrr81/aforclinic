@@ -1,0 +1,27 @@
+import { Extension } from '@tiptap/core';
+import Suggestion from '@tiptap/suggestion';
+
+export default Extension.create({
+  name: 'customCommands',
+  addOptions() {
+    return {
+      suggestion: {
+        char: '/',
+        // eslint-disable-next-line ts/ban-ts-comment
+        // @ts-ignore
+        command: ({ editor, range, props }) => {
+          props.command({ editor, range });
+        },
+      },
+    };
+  },
+
+  addProseMirrorPlugins() {
+    return [
+      Suggestion({
+        editor: this.editor,
+        ...this.options.suggestion,
+      }),
+    ];
+  },
+});

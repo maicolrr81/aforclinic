@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.beforeafter.mapper.BeforeAfterBannerMapper">
+
+    <resultMap id="beforeAfterBanner"     type="BeforeAfterBanner">
+        <id     property="id"               column="id" />
+        <result property="title"            column="title" />
+        <result property="description"      column="description" />
+        <result property="mediaType"        column="media_type" />
+        <result property="mediaContent"     column="media_content" />
+        <result property="status"           column="status" />
+        <result property="createdAt"        column="created_at" />
+        <result property="createdBy"        column="created_by" />
+        <result property="modifiedAt"       column="modified_at" />
+        <result property="modifiedBy"       column="modified_by" />
+    </resultMap>
+    
+    <sql id="conditions">
+        <if test="search.title != null and search.title.trim().length() > 0">
+            and (
+                a.title like concat('%', #{search.title}, '%')
+                or a.description like concat('%', #{search.title}, '%')
+            )
+        </if>
+        and (a.status is null or a.status != 'DELETED') 
+    </sql>
+
+    <select id="selectList" resultMap="beforeAfterBanner">
+        select a.id
+             , a.title
+             , a.description
+             , a.media_type
+             , a.media_content
+             , a.status
+             , a.created_at
+             , u1.nickname as created_by
+             , a.modified_at
+             , u2.nickname as modified_by
+        from before_after_banner a
+            left outer join user u1 
+                on u1.id = a.created_by
+            left outer join user u2
+                on u2.id = a.modified_by
+        <where>
+              <include refid="conditions" />
+        </where>
+        order by a.created_at desc
+        <if test="!paging.unpaged">
+            limit #{paging.limit}
+            offset #{paging.offset}
+        </if>
+    </select>
+    
+    <select id="selectTotalCount" resultType="long">
+        select count(*)
+        from before_after_banner a
+        <where>
+              <include refid="conditions" />
+        </where>
+    </select>
+    
+    <select id="selectById" resultMap="beforeAfterBanner">
+        select a.id
+             , a.title
+             , a.description
+             , a.media_type
+             , a.media_content
+             , a.status
+             , a.created_at
+             , u1.nickname as created_by
+             , a.modified_at
+             , u2.nickname as modified_by
+        from before_after_banner a
+            left outer join user u1 
+                on u1.id = a.created_by
+            left outer join user u2
+                on u2.id = a.modified_by
+        where a.id = #{id}
+    </select>
+    
+    <insert id="insert">
+        insert into before_after_banner (
+            id
+            , title
+            , description
+            , media_type
+            , media_content
+            , status
+            , created_by
+        ) values (
+            #{id}
+            , #{title}
+            , #{description}
+            , #{mediaType}
+            , #{mediaContent}
+            , #{status}
+            , #{createdBy}
+        )
+    </insert>
+    
+    <update id="update">
+        update before_after_banner
+        <set>
+            title = #{title}
+            , description = #{description}
+            , media_type = #{mediaType}
+            , media_content = #{mediaContent}
+            , modified_by = #{modifiedBy}
+        </set>
+        where id = #{id}
+    </update>
+    
+    <update id="updateDelete">
+        update before_after_banner
+        <set>
+            status = #{status}
+            , modified_by = #{modifiedBy}
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

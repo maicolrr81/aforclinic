@@ -1,0 +1,174 @@
+spring:
+  application:
+    name: api
+  jackson:
+    time-zone: Asia/Seoul
+  servlet:
+      multipart:
+        max-file-size: 10MB
+        max-request-size: 10MB
+  # 프로필 설정
+  profiles:
+    active: local
+    group:
+      # local은 development 그룹
+      local:
+        - development
+      # dev는 development 그룹
+      dev: 
+        - development
+      # stg는 staging 그룹
+      stg: 
+        - staging
+      # prod는 production 그룹
+      prod:
+        - production
+
+---
+spring:
+  config:
+    activate:
+      on-profile: development
+  datasource:
+      driver-class-name: org.mariadb.jdbc.Driver
+      url: jdbc:mariadb://localhost:3306/aforclinic?serverTimezone=Asia/Seoul
+      username: aforclinic
+      password: "aforclinic!@"
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: empty
+            client-secret: empty
+            client-authentication-method: client_secret_post
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            client-name: Kakao
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+# 애플리케이션 정보
+app:
+  cors:
+    allowed-origins:
+    - http://localhost:3000
+    - http://localhost:4000
+    allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+  oauth2:
+    default-redirect-uri: http://localhost:3000
+    success-redirect-uri: http://localhost:3000/api/auth/oauth-callback
+  storage:
+    root-path: c:/app/store
+  
+# 로깅 레벨에 따라 설정
+logging:
+  level:
+    '[org.springframework]': debug
+    '[com.xenialsoft.api]': debug
+
+---
+spring:
+  config:
+    activate:
+      on-profile: staging
+  datasource:
+      driver-class-name: org.mariadb.jdbc.Driver
+      url: jdbc:mariadb://localhost:3306/aforclinic?serverTimezone=Asia/Seoul
+      username: aforclinic
+      password: "aforclinic!@"
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: 920b1da2ef21afc033f9cbf7aab269ac
+            client-secret: 7ub5YFhlpqatWcIHyRicKEAZfBRHPQp7
+            client-authentication-method: client_secret_post
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            client-name: Kakao
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+# 애플리케이션 정보
+app:
+  cors:
+    allowed-origins:
+    - https://aforclinic.com
+    - https://admin.aforclinic.com
+    allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+  jwt:
+    secret-key: dcd9eed8f22f965772b9986c27505e126b9e50e51dac364c93213fc8ca33c00b
+  oauth2:
+    default-redirect-uri: https://aforclinic.com
+    success-redirect-uri: https://aforclinic.com/api/auth/oauth-callback
+  storage:
+    root-path: /var/www/aforclinic/store
+    
+---
+spring:
+  config:
+    activate:
+      on-profile: production
+  datasource:
+      driver-class-name: org.mariadb.jdbc.Driver
+      url: jdbc:mariadb://localhost:3306/aforclinic?serverTimezone=Asia/Seoul
+      username: aforclinic
+      password: "aforclinic!@"
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: 920b1da2ef21afc033f9cbf7aab269ac
+            client-secret: 7ub5YFhlpqatWcIHyRicKEAZfBRHPQp7
+            client-authentication-method: client_secret_post
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            client-name: Kakao
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+# 애플리케이션 정보
+app:
+  cors:
+    allowed-origins:
+    - https://aforclinic.com
+    - https://admin.aforclinic.com
+    allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+  jwt:
+    secret-key: dcd9eed8f22f965772b9986c27505e126b9e50e51dac364c93213fc8ca33c00b
+  oauth2:
+    default-redirect-uri: https://aforclinic.com
+    success-redirect-uri: https://aforclinic.com/api/auth/oauth-callback
+  storage:
+    root-path: /var/www/store
+    

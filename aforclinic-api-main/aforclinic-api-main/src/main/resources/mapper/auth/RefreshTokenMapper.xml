@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.auth.mapper.RefreshTokenMapper">
+
+    <resultMap id="refreshToken" type="RefreshToken">
+        <id     property="id"           column="id" />
+        <result property="userId"       column="user_id" />
+        <result property="createdAt"    column="created_at" />
+        <result property="expireAt"     column="expire_at" />
+        <result property="lastUsedAt"   column="last_used_at" />
+    </resultMap>
+    
+    <select id="findById" resultMap="refreshToken">
+        select rt.id
+             , rt.user_id
+             , rt.created_at
+             , rt.expire_at
+             , rt.last_used_at
+          from refresh_token rt
+         where rt.id = #{id}
+    </select>
+    
+    <insert id="insert">
+        insert into refresh_token (
+            id
+          , user_id
+          , expire_at
+        ) values (
+            #{id}
+          , #{userId}
+          , #{expireAt}
+        )
+    </insert>
+    
+    <update id="update">
+        update refresh_token
+           set last_used_at = #{lastUsedAt}
+         where id = #{id}
+    </update>
+    
+    <delete id="delete">
+        delete
+          from refresh_token
+         where id = #{id}
+    </delete>
+    
+</mapper>

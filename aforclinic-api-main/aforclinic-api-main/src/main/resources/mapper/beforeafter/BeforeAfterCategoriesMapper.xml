@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.beforeafter.mapper.BeforeAfterCategoriesMapper">
+
+    <resultMap id="beforeAfterCategories"     type="BeforeAfterCategories">
+        <id     property="beforeAfterId"    column="before_after_id" />
+        <result property="categoryId"       column="category_id" />
+    </resultMap>
+    
+    <insert id="insert">
+        insert into before_after_categories (
+            before_after_id
+            , category_id
+        ) values (
+            #{beforeAfterId}
+            , #{categoryId}
+        )
+    </insert>
+    
+    <delete id="delete">
+        delete from before_after_categories
+        where before_after_id = #{id}
+    </delete>
+
+</mapper>

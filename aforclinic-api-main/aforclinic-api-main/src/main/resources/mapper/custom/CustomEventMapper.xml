@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.custom.event.mapper.CustomEventMapper">
+
+    <resultMap id="event" type="CustomEvent">
+        <id     property="id"                   column="event_id" />
+        <result property="title"                column="event_title" />
+        <result property="description"          column="event_description" />
+        <result property="imageId"              column="event_image_id" />
+        <result property="startDate"            column="event_start_date" />
+        <result property="endDate"              column="event_end_date" />
+        <result property="minDiscountedPrice"   column="min_discounted_price" />
+        <result property="maxDiscountedPrice"   column="max_discounted_price" />
+    </resultMap>
+    
+    <select id="mainEventProductList" resultMap="event">
+        select a.id             as event_id
+             , c.name           as event_title
+             , c.description    as event_description
+             , a.image_id       as event_image_id
+             , a.start_date     as event_start_date
+             , a.end_date       as event_end_date
+             , b.adjusted_price as max_discounted_price
+             , b.discounted_price as min_discounted_price
+        from event a
+            left join event_products b on (b.event_id = a.id)
+            left join product c on (c.id = b.product_id)
+        where a.status = 'ACTIVE' 
+            and a.start_date <![CDATA[ <= ]]> CURDATE() 
+            and a.end_date <![CDATA[ >= ]]> CURDATE() 
+            and a.post_id is null 
+            and b.is_main_visible = true 
+            and c.status = 'ACTIVE'
+        order by a.start_date, a.created_at, b.display_order, c.name 
+    </select>
+    
+    <sql id="conditions">
+        <!-- 이벤트 식별자로 조회 -->
+        <if test='search.eventIds != null and search.eventIds.size() > 0'>
+            and a.event_id in
+            <foreach item="eventId" collection="search.eventIds" open="(" separator="," close=")">
+                #{eventId}
+            </foreach>
+        </if>
+    </sql>
+    
+    <select id="selectList" resultMap="event">
+        select a.event_id
+             , a.event_title
+             , a.event_description
+             , a.event_image_id
+             , a.event_start_date
+             , a.event_end_date
+             , a.min_discounted_price
+             , a.max_discounted_price
+          from view_event a
+        <where>
+            <include refid="conditions" />
+        </where>
+        <if test='!paging.unpaged'>
+            limit #{paging.limit}
+            offset #{paging.offset}
+        </if>
+    </select>
+    
+    <select id="selectById" resultMap="event">
+        select a.event_id
+             , a.event_title
+             , a.event_description
+             , a.event_image_id
+             , a.event_start_date
+             , a.event_end_date
+             , a.min_discounted_price
+             , a.max_discounted_price
+          from view_event a
+         where a.event_id = #{id}
+    </select>
+
+</mapper>

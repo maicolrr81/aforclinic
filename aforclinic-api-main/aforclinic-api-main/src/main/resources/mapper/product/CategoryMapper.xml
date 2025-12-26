@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.product.mapper.CategoryMapper">
+
+    <resultMap id="category" type="Category">
+        <id     property="id"               column="id" />
+        <result property="name"             column="name" />
+        <result property="description"      column="description" />
+        <result property="displayOrder"     column="display_order" />
+        <result property="status"           column="status" />
+        <result property="createdAt"        column="created_at" />
+        <result property="createdBy"        column="created_by" />
+        <result property="modifiedAt"       column="modified_at" />
+        <result property="modifiedBy"       column="modified_by" />
+    </resultMap>
+    
+    <sql id="conditions">
+        <if test='search.text != null and search.text.trim().length() > 0'>
+            and (
+                a.name like concat('%', #{search.text}, '%')
+             or a.description like concat('%', #{search.text}, '%')
+            )
+        </if>
+        and (a.status is null or a.status != 'DELETED')
+    </sql>
+    
+    <select id="selectList" resultMap="category">
+        select a.id
+             , a.name
+             , a.description
+             , a.display_order
+             , a.status
+             , a.created_at
+             , u1.nickname      as created_by
+             , a.modified_at
+             , u2.nickname      as modified_by
+          from category a
+     left join user u1
+            on u1.id = a.created_by
+     left join user u2
+            on u2.id = a.modified_by
+        <where>
+            <include refid="conditions" />
+        </where>
+      order by a.display_order
+             , a.created_at
+        <if test="!paging.unpaged">
+            limit #{paging.limit}
+            offset #{paging.offset}
+        </if>
+    </select>
+    
+    <select id="selectTotalCount">
+        select count(*)
+          from category a
+        <where>
+            <include refid="conditions" />
+        </where>
+    </select>
+    
+    <select id="selectById" resultMap="category">
+        select a.id
+             , a.name
+             , a.description
+             , a.display_order
+             , a.status
+             , a.created_at
+             , u1.nickname      as created_by
+             , a.modified_at
+             , u2.nickname      as modified_by
+        from category a
+            left join user u1
+                on u1.id = a.created_by
+            left join user u2
+                on u2.id = a.modified_by
+        where a.id = #{id}
+            and (a.status is null or a.status != 'DELETED')
+    </select>
+    
+    <select id="selectByName">
+        select count(*)
+        from category
+        where name = #{name}
+            and (status is null or status != 'DELETED')
+    </select>
+    
+    <insert id="insert">
+        insert into category (
+            id,
+            name,
+            description,
+            display_order,
+            status,
+            created_by
+        ) values (
+            #{id},
+            #{name},
+            #{description},
+            #{displayOrder},
+            #{status},
+            #{createdBy}
+        )
+    </insert>
+        
+    <update id="update">
+        update category
+            set name = #{name},
+                description = #{description},
+                modified_by = #{modifiedBy}
+        where id = #{id}
+    </update>
+    
+    <update id="reorder">
+        update category
+           set display_order = #{displayOrder}
+             , modified_by = #{modifiedBy}
+         where id = #{id}
+    </update>
+    
+    <!-- 유효한 product 가 있는 경우. category 삭제 불가 -->
+    <select id="hasProduct">
+        select count(*)
+        from product a
+            inner join product_categories b
+                on (a.id = b.product_id)
+        where b.category_id = #{id}
+            and (a.status is null or a.status != 'DELETED')
+    </select>
+    
+    <!-- 유효한 전후사진이 있는 경우. category 삭제 불가 -->
+    <select id="hasBeforeAfter">
+        select count(*)
+        from before_after a
+            inner join before_after_categories b
+                on (a.id = b.before_after_id)
+        where b.category_id = #{id}
+            and (a.status is null or a.status != 'DELETED')
+    </select>
+    
+    <update id="updateStatus">
+        update category
+           set status = #{status}
+             , modified_by = #{modifiedBy}
+         where id = #{id}
+    </update>
+
+</mapper>

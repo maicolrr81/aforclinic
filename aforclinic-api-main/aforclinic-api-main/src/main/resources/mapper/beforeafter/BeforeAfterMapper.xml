@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.beforeafter.mapper.BeforeAfterMapper">
+
+    <resultMap id="beforeafter"     type="BeforeAfter">
+        <id     property="id"               column="id" />
+        <result property="title"            column="title"/>
+        <result property="description"      column="description"/>
+        <result property="image"            column="image"/>
+        <result property="beforeImage"      column="before_image"/>
+        <result property="afterImage"       column="after_image"/>
+        <result property="afterBlurImage"   column="after_blur_image"/>
+        <result property="status"           column="status"/>
+        <result property="createdAt"        column="created_at" />
+        <result property="createdBy"        column="created_by" />
+        <result property="modifiedAt"       column="modified_at" />
+        <result property="modifiedBy"       column="modified_by" />
+        <collection property="beforeAfterCategoriesList" javaType="java.util.List" ofType="BeforeAfterCategories">
+            <id property="beforeAfterId"	column="id" />
+            <id	property="categoryId"		column="category_id" />
+            <association property="category" javaType="Category">
+	            <id     property="id"       column="category_id" />
+	            <result property="name"    	column="category_name" />
+	        </association>
+        </collection>        
+        <collection property="beforeAfterTagsList" javaType="java.util.List" ofType="BeforeAfterTags">
+            <id property="beforeAfterId"    column="id" />
+            <id property="tag"              column="tag" />
+        </collection>
+    </resultMap>
+
+    <sql id="conditions">
+        <if test="search.title != null and search.title.trim().length() > 0">
+            and (
+                a.title like concat('%', #{search.title}, '%')
+                or a.description like concat('%', #{search.title}, '%')
+            )
+        </if>
+        <if test="search.categoryId != null and search.categoryId.trim().length() > 0">
+            and bac.category_id = #{search.categoryId}
+        </if>
+        <if test="search.tag != null and search.tag.trim().length() > 0">
+            and bat.tag = #{search.tag}
+        </if>
+        and (a.status is null or a.status != 'DELETED')
+    </sql>
+
+    <select id="selectList" resultMap="beforeafter">
+        select a.id
+             , a.title
+             , a.description
+             , a.image
+             , a.before_image
+             , a.after_image
+             , a.after_blur_image
+             , a.status
+             , a.created_at
+             , u1.nickname as created_by
+             , a.modified_at
+             , u2.nickname as modified_by
+             , bac.category_id
+             , c.name as category_name
+             , bat.tag
+        from (
+            select distinct a.*
+            from before_after a
+            <if test="search.categoryId != null or search.tag != null">
+                left join before_after_categories bac on bac.before_after_id = a.id
+                <if test="search.categoryId != null">
+                    inner join category c on c.id = bac.category_id
+                      and (c.status is null or c.status != 'DELETED')
+                </if>
+                left join before_after_tags bat on bat.before_after_id = a.id
+            </if>
+            <where>
+                <include refid="conditions" />
+            </where>
+            order by a.created_at desc
+            <if test="!paging.unpaged">
+                limit #{paging.limit}
+                offset #{paging.offset}
+            </if>
+        ) a
+        left join user u1 on u1.id = a.created_by
+        left join user u2 on u2.id = a.modified_by
+        left join before_after_categories bac on bac.before_after_id = a.id
+        left join category c on c.id = bac.category_id
+            and (c.status is null or c.status != 'DELETED')
+        left join before_after_tags bat on bat.before_after_id = a.id
+    </select>
+    
+    <select id="selectTotalCount" resultType="long">
+        select count(distinct a.id)
+        from before_after a
+        <if test="search.categoryId != null and search.categoryId.trim().length() > 0">
+            inner join before_after_categories bac on bac.before_after_id = a.id
+            inner join category c on c.id = bac.category_id
+                and (c.status is null or c.status != 'DELETED')
+        </if>
+        <if test="search.tag != null and search.tag.trim().length() > 0">
+            inner join before_after_tags bat on bat.before_after_id = a.id
+        </if>
+        <where>
+            <include refid="conditions" />
+        </where>
+    </select>
+    
+    <select id="selectById" resultMap="beforeafter">
+        select a.id
+             , a.title
+             , a.description
+             , a.image
+             , a.before_image
+             , a.after_image
+             , a.after_blur_image
+             , a.status
+             , a.created_at
+             , u1.nickname as created_by
+             , a.modified_at
+             , u2.nickname as modified_by
+             , b.category_id
+             , b.name as category_name
+             , c.tag
+        from before_after a
+            left outer join user u1 
+                on u1.id = a.created_by
+            left outer join user u2
+                on u2.id = a.modified_by
+			left outer join (
+				select a.before_after_id, a.category_id, b.name 
+				from before_after_categories a 
+					inner join category b 
+						on (a.category_id = b.id and (b.status is null or b.status != 'DELETED'))
+			) b 
+				on b.before_after_id = a.id
+            left outer join before_after_tags c
+                on c.before_after_id = a.id 
+        where a.id = #{id}
+    </select>
+    
+    <insert id="insert">
+        insert into before_after (
+            id
+            , title
+            , description
+            , image
+            , before_image
+            , after_image
+            , after_blur_image
+            , status
+            , created_by
+        ) values (
+            #{id}
+            , #{title}
+            , #{description}
+            , #{image}
+            , #{beforeImage}
+            , #{afterImage}
+            , #{afterBlurImage}
+            , #{status}
+            , #{createdBy}
+        )
+    </insert>
+    
+    <update id="update">
+        update before_after
+        <set>
+            title = #{title}
+            , description = #{description}
+            , image = #{image}
+            , before_image = #{beforeImage}
+            , after_image = #{afterImage}
+            , after_blur_image = #{afterBlurImage}
+            , modified_by = #{modifiedBy}
+        </set>
+        where id = #{id}
+    </update>
+    
+    <update id="updateDelete">
+        update before_after
+        <set>
+            status = #{status}
+            , modified_by = #{modifiedBy}
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

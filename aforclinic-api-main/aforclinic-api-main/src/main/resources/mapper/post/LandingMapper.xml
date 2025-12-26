@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.post.mapper.LandingMapper">
+
+    <resultMap id="landing" type="Landing">
+        <id     property="postId"       column="post_id" />
+        <result property="description"  column="description" />
+        <result property="imageId"      column="image_id" />
+        <result property="startDate"    column="start_date" />
+        <result property="endDate"      column="end_date" />
+        <association property="post" javaType="Post">
+            <id     property="id"           column="post_id" />
+            <result property="title"        column="title" />
+            <result property="content"      column="content" />
+            <result property="status"       column="status" />
+            <result property="createdAt"    column="created_at" />
+            <result property="createdBy"    column="created_by" />
+            <result property="modifiedAt"   column="modified_at" />
+            <result property="modifiedBy"   column="modified_by" />
+        </association>
+    </resultMap>
+    
+    <sql id="conditions">
+        <!-- 상태로 조회 -->
+        <choose>
+            <when test='search.status != null'>
+                and a.status = #{search.status}
+            </when>
+            <otherwise>
+                and a.status != 'DELETED'
+            </otherwise>
+        </choose>
+        
+        <!-- 검색어로 조회 -->
+        <if test='search.text != null and search.text.trim().length() > 0'>
+            and (
+                a.title like concat('%', #{search.text}, '%')
+            )
+        </if>
+    </sql>
+    
+    <select id="selectList" resultMap="landing">
+        select a.id as post_id
+             , a.title
+             , b.description
+             , b.image_id
+             , b.start_date
+             , b.end_date
+             , a.status
+             , a.created_at
+             , u1.nickname      as created_by
+             , a.modified_at
+             , u2.nickname      as modified_by
+          from post a
+    inner join post_landing b
+            on b.post_id = a.id
+     left join user u1
+            on u1.id = a.created_by
+     left join user u2
+            on u2.id = a.modified_by
+        <where>
+            <include refid="conditions" />
+        </where>
+      order by a.created_at desc
+        <if test='!paging.unpaged'>
+             limit #{paging.limit}
+            offset #{paging.offset}
+        </if>
+    </select>
+    
+    <select id="selectTotalCount" resultType="long">
+        select count(*)
+          from post a
+    inner join post_landing b
+            on b.post_id = a.id
+        <where>
+            <include refid="conditions" />
+        </where>
+    </select>
+    
+    <select id="selectByPostId" resultMap="landing">
+        select a.id as post_id
+             , a.title
+             , b.description
+             , a.content
+             , b.image_id
+             , b.start_date
+             , b.end_date
+             , a.status
+             , a.created_at
+             , u1.nickname      as created_by
+             , a.modified_at
+             , u2.nickname      as modified_by
+          from post a
+    inner join post_landing b
+            on b.post_id = a.id
+     left join user u1
+            on u1.id = a.created_by
+     left join user u2
+            on u2.id = a.modified_by
+         where a.id = #{postId}
+    </select>
+    
+    <insert id="insert">
+        insert into post_landing (
+            post_id
+          , description
+          , image_id
+          , start_date
+          , end_date
+        ) values (
+            #{postId}
+          , #{description}
+          , #{imageId}
+          , #{startDate}
+          , #{endDate}
+        )
+    </insert>
+    
+    <update id="update">
+        update post_landing
+        <set>
+            <if test='description != null'>
+                description = #{description},
+            </if>
+            <if test='imageId != null '>
+                image_id = #{imageId},
+            </if>
+            <if test='startDate != null'>
+                start_date = #{startDate},
+            </if>
+            <if test='endDate != null'>
+                end_date = #{endDate},
+            </if>
+        </set>
+         where post_id = #{postId}
+    </update>
+
+</mapper>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.product.mapper.ProductBundleMapper">
+
+    <resultMap id="productBundle" type="ProductBundle">   
+        <id     property="bundleId"     column="bundle_id" />
+        <id     property="productId"    column="product_id" />
+        <result property="quantity"		column="quantity" />
+        <association property="product" javaType="Product">
+            <id     property="id"               column="product_id"/>
+            <result property="name"             column="product_name"/>
+            <result property="adjustedPrice"    column="product_adjusted_price"/>
+            <result property="discountedPrice"  column="product_discounted_price"/>
+        </association>
+        <collection property="categoryIdList" ofType="string">
+            <result column="category_id" />
+        </collection>
+    </resultMap>
+    
+    <select id="selectListById" resultMap="productBundle">
+		select a.bundle_id
+			, a.product_id
+			, b.name as product_name
+			, b.adjusted_price  as product_adjusted_price
+			, b.discounted_price as product_discounted_price
+			, a.quantity 
+			, c.category_id
+		from product_bundle a
+			inner join product b 
+                on (a.product_id = b.id)
+            inner join product_categories c
+                on (b.id = c.product_id) 
+		where a.bundle_id = #{id}
+    </select>
+    
+    <select id="selectBundleCategoryListByProductId" resultMap="productBundle">
+        select b.bundle_id
+             , b.product_id
+             , c.category_id
+        from product_bundle a
+            inner join product_bundle b 
+                on (a.bundle_id = b.bundle_id)
+            inner join product p
+                on (b.bundle_id = p.id and (p.status is null or p.status != 'DELETED'))
+            inner join product_categories c
+                on (b.product_id = c.product_id)
+        where a.product_id = #{id}
+        order by b.bundle_id, b.product_id
+    </select>
+    
+    <insert id="insert">
+        insert into product_bundle (
+			bundle_id,
+			product_id,
+			quantity
+        ) values (
+            #{bundleId},
+            #{productId},
+            #{quantity}
+        )
+    </insert>
+
+    <delete id="delete">
+        delete from product_bundle
+        where bundle_id = #{id}
+    </delete>
+
+</mapper>

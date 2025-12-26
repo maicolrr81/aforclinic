@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xenialsoft.api.core.beforeafter.mapper.BeforeAfterTagsMapper">
+
+    <resultMap id="beforeAfterTags"     type="BeforeAfterTags">
+        <id     property="beforeAfterId"    column="before_after_id" />
+        <result property="tag"              column="tag" />
+    </resultMap>
+    
+    <select id="selectListById" resultType="string">
+        select a.tag
+        from before_after_tags a
+        where a.before_after_id = #{id}
+    </select>
+    
+    <select id="selectTotalCount" resultType="long">
+        select count(*)
+        from before_after_tags a
+        where a.before_after_id = #{id}
+    </select>
+    
+    <select id="selectTagList" resultType="string">
+        select a.tag
+        from before_after_tags a 
+            inner join before_after b 
+                on (a.before_after_id = b.id and (b.status is null or b.status != 'DELETED'))
+        group by a.tag
+        order by a.tag
+    </select>
+    
+    <insert id="insert">
+        insert into before_after_tags (
+            before_after_id
+            , tag
+        ) values (
+            #{beforeAfterId}
+            , #{tag}
+        )
+    </insert>
+    
+    <delete id="delete">
+        delete from before_after_tags
+        where before_after_id = #{id}
+    </delete>
+
+</mapper>
