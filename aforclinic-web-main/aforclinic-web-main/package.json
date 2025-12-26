@@ -1,0 +1,58 @@
+{
+  "name": "web",
+  "type": "module",
+  "private": true,
+  "packageManager": "pnpm@10.10.0",
+  "scripts": {
+    "build": "nuxi build",
+    "dev": "nuxi dev",
+    "generate": "nuxi generate",
+    "preview": "nuxi preview",
+    "postinstall": "nuxi prepare"
+  },
+  "dependencies": {
+    "nuxt": "^3.17.5",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.16.1",
+    "@iconify-json/ion": "^1.2.3",
+    "@iconify-json/lineicons": "^1.2.4",
+    "@iconify-json/mdi": "^1.2.3",
+    "@nuxt/eslint": "^1.4.1",
+    "@nuxt/icon": "^1.14.0",
+    "@nuxt/image": "^1.10.0",
+    "@nuxtjs/robots": "^5.2.11",
+    "@nuxtjs/sitemap": "^7.4.2",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@pinia/nuxt": "^0.11.1",
+    "@samk-dev/nuxt-vcalendar": "^1.0.4",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/eslint-plugin-tailwindcss": "^3.17.0",
+    "@types/google.maps": "^3.58.1",
+    "@types/navermaps": "^3.9.1",
+    "@types/node": "^22.15.33",
+    "@vueuse/core": "^13.4.0",
+    "@vueuse/nuxt": "^13.4.0",
+    "dayjs-nuxt": "^2.1.11",
+    "eslint": "^9.29.0",
+    "eslint-plugin-format": "^1.0.1",
+    "eslint-plugin-tailwindcss": "^3.18.0",
+    "nuxt-headlessui": "^1.2.0",
+    "pinia": "^3.0.3",
+    "tailwind-scrollbar-hide": "^2.0.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
+    "vue3-carousel-nuxt": "^1.1.6"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
+}

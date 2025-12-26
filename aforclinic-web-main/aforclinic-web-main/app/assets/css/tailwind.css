@@ -1,0 +1,42 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply min-h-full scroll-smooth;
+    font-family: Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, Helvetica Neue, Segoe UI, Apple SD Gothic Neo, Noto Sans KR, Malgun Gothic, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, sans-serif;
+  }
+
+  html {
+    @apply !p-0;
+  }
+
+  body {
+    @apply bg-primary;
+  }
+
+  input:focus, textarea:focus {
+    @apply outline-none;
+  }
+}
+
+@layer components {
+  .invalid-feedback {
+    @apply text-sm text-red-600 mt-2;
+  }
+  
+  .valid-feedback {
+    @apply text-sm text-blue-600 mt-2;
+  }
+}
+
+#__nuxt {
+  @apply w-full h-full;
+}
+
+.prose :where(img):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  @apply my-0 inline;
+}
