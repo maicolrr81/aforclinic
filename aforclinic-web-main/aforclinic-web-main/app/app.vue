@@ -2,7 +2,7 @@
 // Use SSR-safe IDs for Headless UI
 provideHeadlessUseId(() => useId());
 
-const { $modal, $router } = useNuxtApp();
+const { $modal, $router, $dialog } = useNuxtApp();
 watch(() => $router.currentRoute.value.path, () => $modal.reset);
 </script>
 
@@ -13,6 +13,6 @@ watch(() => $router.currentRoute.value.path, () => $modal.reset);
     <NuxtPage />
   </NuxtLayout>
   <LoginModal v-model="$modal.state.isLoginModalOpen" />
-  <UiDialog v-model="$dialog.state.open" />
+  <UiDialog v-if="$dialog" v-model="$dialog.state.open" />
   <UiOverlay />
 </template>
