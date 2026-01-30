@@ -96,7 +96,7 @@ useSeoMeta({
       <div class="py-4">
         <img
           alt="中顔面短縮"
-          src="/images/ja/popular-procedure_ch.jpg"
+          src="/images/ja/popular-procedure_ch.png"
           class="w-full"
         />
       </div>
@@ -132,7 +132,7 @@ useSeoMeta({
       <div class="py-4">
         <img
           alt="doctor"
-          src="/images/ja/doctor_ch.jpg"
+          src="/images/ja/doctor_ch.png"
           class="w-full"
           width="768px"
         />
