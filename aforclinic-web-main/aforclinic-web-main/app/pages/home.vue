@@ -248,13 +248,13 @@ const recommendedKeywords = computed<string[]>(() => {
             href="http://map.naver.com/p/entry/place/1675719584?placePath=%2Fhome"
             target="_blank"
           >
-            <img
-              alt="네이버 지도"
-              class="me-2 inline rounded ring-1"
-              src="~/assets/icons/navermap_service_icon.png"
-              width="20px"
-              title="네이버 지도"
-            >
+             <img
+               alt="네이버 지도"
+               class="me-2 inline rounded ring-1"
+               src="~/assets/icons/navermap_service_Icon.png"
+               width="20px"
+               title="네이버 지도"
+             >
             네이버 지도
           </a>
           <a
