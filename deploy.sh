@@ -1,92 +1,104 @@
 #!/bin/bash
 
-# Aforclinic Deployment Script
-# Usage: ./deploy.sh [package-file.tar.gz or package-file.zip]
+# AforClinic 소스 다운로드 스크립트
+# GitHub에서 전체 저장소를 다운받습니다
+# 사용법: bash deploy.sh [브랜치명]
+# 예시: bash deploy.sh main
 
-set -e
+# 설정
+GIT_REPO="https://github.com/maicolrr81/aforclinic.git"
+GIT_BRANCH=${1:-main}
+CURRENT_DIR=$(pwd)
 
-PACKAGE_FILE=${1:-aforclinic-deploy.tar.gz}
-DEPLOY_DIR="/var/www"
-BACKUP_DIR="/var/www/backups"
+# GitHub 인증 정보 (환경변수 또는 직접 설정)
+# 방법 1: 환경변수 사용 (권장)
+# export GIT_USERNAME="maicolrr81"
+# export GIT_TOKEN="your_personal_access_token"
+# 
+# 방법 2: 직접 설정 (보안상 권장하지 않음)
+# 아래에 Personal Access Token을 입력하세요 (패스워드가 아닌 토큰!)
+GIT_USERNAME="${GIT_USERNAME:-maicolrr81}"
+GIT_TOKEN="${GIT_TOKEN:-}"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-echo "========================================"
-echo "AforClinic Deployment Script"
-echo "========================================"
-echo ""
-
-# Check if package file exists
-if [ ! -f "/tmp/$PACKAGE_FILE" ] && [ ! -f "$PACKAGE_FILE" ]; then
-    echo -e "${RED}ERROR: Package file not found: $PACKAGE_FILE${NC}"
-    echo "Please upload the package file to /tmp/ or current directory"
-    exit 1
-fi
-
-# Determine package file location
-if [ -f "/tmp/$PACKAGE_FILE" ]; then
-    PACKAGE_PATH="/tmp/$PACKAGE_FILE"
-elif [ -f "$PACKAGE_FILE" ]; then
-    PACKAGE_PATH="$PACKAGE_FILE"
-fi
-
-# Create backup directory
-mkdir -p "$BACKUP_DIR"
-
-# Backup existing deployment
-echo -e "${YELLOW}Creating backup...${NC}"
-BACKUP_FILE="$BACKUP_DIR/backup-$(date +%Y%m%d-%H%M%S).tar.gz"
-if [ -d "$DEPLOY_DIR/api" ] || [ -d "$DEPLOY_DIR/web" ] || [ -d "$DEPLOY_DIR/admin" ]; then
-    cd "$DEPLOY_DIR"
-    tar -czf "$BACKUP_FILE" api web admin ecosystem.config.cjs 2>/dev/null || true
-    echo -e "${GREEN}Backup created: $BACKUP_FILE${NC}"
-fi
-
-# Stop PM2 processes
-echo -e "${YELLOW}Stopping PM2 processes...${NC}"
-pm2 stop all 2>/dev/null || true
-pm2 delete all 2>/dev/null || true
-
-# Extract package
-echo -e "${YELLOW}Extracting package...${NC}"
-cd "$DEPLOY_DIR"
-
-if [[ "$PACKAGE_PATH" == *.tar.gz ]]; then
-    tar -zxvf "$PACKAGE_PATH" -C "$DEPLOY_DIR"
-elif [[ "$PACKAGE_PATH" == *.zip ]]; then
-    unzip -q "$PACKAGE_PATH" -d "$DEPLOY_DIR"
+# 토큰이 있으면 URL에 포함
+if [ -n "$GIT_TOKEN" ]; then
+    GIT_REPO_AUTH="https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/maicolrr81/aforclinic.git"
+    echo "⚠️  Personal Access Token을 사용합니다."
 else
-    echo -e "${RED}ERROR: Unsupported package format${NC}"
+    GIT_REPO_AUTH="$GIT_REPO"
+    echo "⚠️  인증 없이 클론 시도 (Public 저장소인 경우에만 작동합니다)"
+fi
+
+echo "=========================================="
+echo "AforClinic 소스 다운로드"
+echo "=========================================="
+echo ""
+echo "저장소: $GIT_REPO"
+echo "브랜치: $GIT_BRANCH"
+echo "다운로드 경로: $CURRENT_DIR"
+echo ""
+
+# Git 설치 확인
+if ! command -v git &> /dev/null; then
+    echo "❌ 오류: Git이 설치되어 있지 않습니다."
+    echo ""
+    echo "Git 설치 방법:"
+    echo "  CentOS/RHEL: sudo yum install git"
+    echo "  Ubuntu/Debian: sudo apt-get install git"
+    echo "  또는: sudo yum install git-core"
     exit 1
 fi
 
-# Set permissions
-echo -e "${YELLOW}Setting permissions...${NC}"
-chown -R ubuntu:ubuntu "$DEPLOY_DIR/api" "$DEPLOY_DIR/web" "$DEPLOY_DIR/admin" 2>/dev/null || true
-chmod +x "$DEPLOY_DIR/api"/*.jar 2>/dev/null || true
-
-# Start PM2
-echo -e "${YELLOW}Starting PM2...${NC}"
-cd "$DEPLOY_DIR"
-pm2 start ecosystem.config.cjs
-pm2 save
+# Git 클론 또는 업데이트
+if [ -d ".git" ]; then
+    echo "기존 저장소 업데이트 중 (pull)..."
+    if git fetch origin; then
+        if git checkout "$GIT_BRANCH" 2>/dev/null || git checkout -b "$GIT_BRANCH" origin/"$GIT_BRANCH" 2>/dev/null; then
+            if git pull origin "$GIT_BRANCH"; then
+                echo "✅ 코드 업데이트 완료"
+            else
+                echo "❌ 오류: git pull 실패"
+                exit 1
+            fi
+        else
+            echo "❌ 오류: git checkout 실패"
+            exit 1
+        fi
+    else
+        echo "❌ 오류: git fetch 실패"
+        exit 1
+    fi
+else
+    echo "새로 클론 중..."
+    # 현재 디렉토리에 파일이 있으면 임시 디렉토리에 클론 후 이동
+    if [ "$(ls -A . 2>/dev/null)" ]; then
+        TEMP_DIR="../aforclinic-temp-$$"
+        echo "임시 디렉토리에 클론 중: $TEMP_DIR"
+        if git clone -b "$GIT_BRANCH" "$GIT_REPO_AUTH" "$TEMP_DIR"; then
+            echo "클론된 파일을 현재 디렉토리로 이동 중..."
+            mv "$TEMP_DIR"/* . 2>/dev/null || true
+            mv "$TEMP_DIR"/.[^.]* . 2>/dev/null || true
+            rm -rf "$TEMP_DIR"
+            echo "✅ 코드 다운로드 완료"
+        else
+            echo "❌ 오류: git clone 실패"
+            rm -rf "$TEMP_DIR" 2>/dev/null || true
+            exit 1
+        fi
+    else
+        # 디렉토리가 비어있으면 직접 클론
+        if git clone -b "$GIT_BRANCH" "$GIT_REPO_AUTH" .; then
+            echo "✅ 코드 다운로드 완료"
+        else
+            echo "❌ 오류: git clone 실패"
+            echo "   저장소 URL과 브랜치명을 확인해주세요."
+            exit 1
+        fi
+    fi
+fi
 
 echo ""
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}Deployment completed!${NC}"
-echo -e "${GREEN}========================================${NC}"
+echo "=========================================="
+echo "✅ 다운로드 완료!"
+echo "=========================================="
 echo ""
-echo "PM2 Status:"
-pm2 status
-echo ""
-echo "To view logs:"
-echo "  pm2 logs api"
-echo "  pm2 logs web"
-echo "  pm2 logs admin"
-echo ""
-
-
