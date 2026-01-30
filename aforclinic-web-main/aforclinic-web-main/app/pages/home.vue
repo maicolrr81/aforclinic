@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Event } from '#shared/types/Event';
-import type { SiteSetting } from '#shared/types/SiteSetting';
+import type { Event } from "#shared/types/Event";
+import type { SiteSetting } from "#shared/types/SiteSetting";
 
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
@@ -17,9 +17,9 @@ useSeoMeta({
   ogImageWidth: `198`,
   ogImageHeight: `60`,
   ogUrl: `${runtimeConfig.public.siteBase}${route.fullPath}`,
-  ogType: 'website',
-  ogLocale: 'ko_KR',
-  ogSiteName: '에이포의원',
+  ogType: "website",
+  ogLocale: "ko_KR",
+  ogSiteName: "에이포의원",
 
   // Twitter
   twitterCard: `summary_large_image`,
@@ -30,10 +30,14 @@ useSeoMeta({
 
 const { $api, $config } = useNuxtApp();
 
-const { data: settings } = await useAsyncData<ApiResponse<SiteSetting>>(() => $api(`/public/site-settings`));
+const { data: settings } = await useAsyncData<ApiResponse<SiteSetting>>(() =>
+  $api(`/public/site-settings`)
+);
 
 const { data: signatures } = await useAsyncData<Product[]>(async () => {
-  const data = await $api<ApiPagedResponse<Product>>(`/public/products/signatures`);
+  const data = await $api<ApiPagedResponse<Product>>(
+    `/public/products/signatures`
+  );
   return data.data.content ?? [];
 });
 
@@ -45,9 +49,12 @@ const { data: mainbannerData } = await useAsyncData<MainBanner[]>(async () => {
 const slides = ref(mainbannerData.value);
 
 const { data: hightlightEvents } = await useAsyncData<Event[]>(async () => {
-  const data = await $api<ApiPagedResponse<Event>>(`/public/events/main-events`, {
-    method: `get`,
-  });
+  const data = await $api<ApiPagedResponse<Event>>(
+    `/public/events/main-events`,
+    {
+      method: `get`,
+    }
+  );
   return data.data.content ?? [];
 });
 
@@ -68,14 +75,8 @@ const recommendedKeywords = computed<string[]>(() => {
         :transition="500"
         :wrap-around="true"
       >
-        <Slide
-          v-for="(slide, index) of slides"
-          :key="index"
-        >
-          <NuxtLink
-            class="w-full"
-            :to="slide.linkUri"
-          >
+        <Slide v-for="(slide, index) of slides" :key="index">
+          <NuxtLink class="w-full" :to="slide.linkUri">
             <NuxtImg
               :alt="slide.title"
               :src="`${$config.public.apiBase}/files/${slide.imageId}`"
@@ -90,24 +91,26 @@ const recommendedKeywords = computed<string[]>(() => {
   <section class="py-4 md:py-12">
     <div class="px-4 md:px-6">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-semibold">
-          이 달의 베스트 이벤트
-        </h3>
+        <h3 class="text-base font-semibold">이 달의 베스트 이벤트</h3>
         <NuxtLink to="/events">
           <img
             src="~/assets/icons/icon-general-arrow-long-right-black.svg"
             alt="이 달의 베스트 이벤트"
-          >
+          />
         </NuxtLink>
       </div>
     </div>
     <div class="mt-6 min-w-0 max-w-screen-md px-4 md:px-6">
-      <div class="flex gap-2 overflow-x-auto pb-4 max-md:scrollbar-hide md:gap-4 md:pb-6">
+      <div
+        class="flex gap-2 overflow-x-auto pb-4 max-md:scrollbar-hide md:gap-4 md:pb-6"
+      >
         <template
           v-for="(hightlightEvent, index) of hightlightEvents"
           :key="index"
         >
-          <div class="grid h-44 w-64 flex-none grid-rows-[auto_1fr_auto] rounded-br-3xl rounded-tl-3xl bg-gray-100 p-6">
+          <div
+            class="grid h-44 w-64 flex-none grid-rows-[auto_1fr_auto] rounded-br-3xl rounded-tl-3xl bg-gray-100 p-6"
+          >
             <div class="text-sm font-semibold md:text-base">
               {{ hightlightEvent.title }}
             </div>
@@ -125,13 +128,8 @@ const recommendedKeywords = computed<string[]>(() => {
                 :to="`/events/${hightlightEvent.id}`"
                 class="flex h-8 items-center gap-2 rounded-full bg-black px-4 text-white"
               >
-                <span class="text-xs text-white">
-                  더보기
-                </span>
-                <NuxtIcon
-                  name="mdi:chevron-right"
-                  size="16"
-                />
+                <span class="text-xs text-white"> 더보기 </span>
+                <NuxtIcon name="mdi:chevron-right" size="16" />
               </NuxtLink>
             </div>
           </div>
@@ -147,50 +145,47 @@ const recommendedKeywords = computed<string[]>(() => {
         src="/images/d916961e1b9093324b3585997b27aff8a562c665dcb2e8f768a3c4114a21adb5.webp"
         width="100%"
         class="h-20 object-cover md:h-auto"
-      >
+      />
     </NuxtLink>
   </section>
 
   <section class="p-4 md:px-8 md:py-12">
     <div class="flex items-center justify-between">
-      <h3 class="text-base font-semibold">
-        시그니쳐 시술
-      </h3>
+      <h3 class="text-base font-semibold">시그니쳐 시술</h3>
       <NuxtLink to="/procedures/signatures">
         <img
           alt="시그니쳐 시술"
           src="~/assets/icons/icon-general-arrow-long-right-black.svg"
-        >
+        />
       </NuxtLink>
     </div>
-    <div class="mt-6 min-w-0 max-w-screen-md ">
-      <div class="flex items-center gap-x-4 overflow-x-auto whitespace-nowrap text-sm text-gray-600 max-md:scrollbar-hide md:text-base">
-        <span
-          v-for="(signature, index) of signatures"
-          :key="index"
-        >
+    <div class="mt-6 min-w-0 max-w-screen-md">
+      <div
+        class="flex items-center gap-x-4 overflow-x-auto whitespace-nowrap text-sm text-gray-600 max-md:scrollbar-hide md:text-base"
+      >
+        <span v-for="(signature, index) of signatures" :key="index">
           {{ signature.name }}
         </span>
       </div>
     </div>
     <div class="mt-8">
-      <label class="flex h-12 appearance-none items-center gap-4 rounded-full bg-gray-100 px-4">
+      <label
+        class="flex h-12 appearance-none items-center gap-4 rounded-full bg-gray-100 px-4"
+      >
         <input
           v-model="text"
           type="text"
           class="h-full grow bg-transparent text-xs font-medium focus:outline-none"
           placeholder="원하는 시술을 검색해 보세요."
           @keyup.enter="navigateTo(`/procedures?text=${text}`)"
-        >
+        />
         <button class="h-6 w-6">
-          <NuxtIcon
-            class="text-gray-400"
-            name="mdi:search"
-            size="24"
-          />
+          <NuxtIcon class="text-gray-400" name="mdi:search" size="24" />
         </button>
       </label>
-      <div class="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs font-normal text-gray-400 md:gap-x-8 md:text-sm">
+      <div
+        class="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs font-normal text-gray-400 md:gap-x-8 md:text-sm"
+      >
         <NuxtLink
           v-for="(recommendedKeyword, index) of recommendedKeywords"
           :key="index"
@@ -204,42 +199,40 @@ const recommendedKeywords = computed<string[]>(() => {
   </section>
 
   <section>
-    <div class="h-48 bg-[url('/images/fa5540a16dd26b149ecafbe4ad6537d9cafc6b6d5abb827fa8972126f77eb8b1.webp')] bg-cover md:h-56 md:bg-auto md:bg-[position:-160px_-135px]">
+    <div
+      class="h-48 bg-[url('/images/fa5540a16dd26b149ecafbe4ad6537d9cafc6b6d5abb827fa8972126f77eb8b1.webp')] bg-cover md:h-56 md:bg-auto md:bg-[position:-160px_-135px]"
+    >
       <NuxtLink
         class="flex h-full w-full items-center justify-end gap-4 px-8"
         href="https://youtube.com/@의사광수"
         target="_blank"
       >
-        <span class="font-normal text-white">
-          YouTube 바로가기
-        </span>
+        <span class="font-normal text-white"> YouTube 바로가기 </span>
         <img
           alt="유튜브 바로가기"
           class="w-12 md:w-16"
           src="~/assets/icons/youtube_social_icon_red.png"
-        >
+        />
       </NuxtLink>
     </div>
   </section>
 
   <section class="space-y-4 p-4 md:px-6 md:py-12">
     <div class="flex justify-between">
-      <h3 class="font-semibold">
-        에이포의원 오시는 길
-      </h3>
+      <h3 class="font-semibold">에이포의원 오시는 길</h3>
       <div>
         <NuxtLink to="/about">
           <img
             src="~/assets/icons/icon-general-arrow-long-right-black.svg"
             alt="에이포의원 오시는 길"
-          >
+          />
         </NuxtLink>
       </div>
     </div>
-    <dl class="grid grid-cols-[auto_1fr] gap-4 gap-y-16 text-sm md:grid-cols-[10rem_1fr]">
-      <dt class="font-medium">
-        주소
-      </dt>
+    <dl
+      class="grid grid-cols-[auto_1fr] gap-4 gap-y-16 text-sm md:grid-cols-[10rem_1fr]"
+    >
+      <dt class="font-medium">주소</dt>
       <dd>
         서울시 강남구 논현로 857, A857 지하 1층(신사동 582-10)
         <div class="mt-4 flex gap-6">
@@ -248,13 +241,13 @@ const recommendedKeywords = computed<string[]>(() => {
             href="http://map.naver.com/p/entry/place/1675719584?placePath=%2Fhome"
             target="_blank"
           >
-             <img
-               alt="네이버 지도"
-               class="me-2 inline rounded ring-1"
-               src="~/assets/icons/navermap_service_Icon.png"
-               width="20px"
-               title="네이버 지도"
-             >
+            <img
+              alt="네이버 지도"
+              class="me-2 inline rounded ring-1"
+              src="~/assets/icons/navermap_service_icon.png"
+              width="20px"
+              title="네이버 지도"
+            />
             네이버 지도
           </a>
           <a
@@ -268,7 +261,7 @@ const recommendedKeywords = computed<string[]>(() => {
               src="~/assets/icons/kakaomap_service_icon.png"
               width="20px"
               title="카카오맵"
-            >
+            />
             카카오 맵
           </a>
         </div>
@@ -279,24 +272,18 @@ const recommendedKeywords = computed<string[]>(() => {
       class="mt-8"
       src="/images/a2eb585963aef5e327c2a7c9c1387018adb995c37fa78456f9fe5431a2963a14.webp"
       width="100%"
+    />
+    <dl
+      class="grid grid-cols-[auto_1fr] gap-4 gap-y-4 text-sm md:grid-cols-[10rem_1fr]"
     >
-    <dl class="grid grid-cols-[auto_1fr] gap-4 gap-y-4 text-sm md:grid-cols-[10rem_1fr]">
-      <dt class="font-medium">
-        간략위치
-      </dt>
-      <dd class="text-gray-500">
-        압구정역 4번 출구 도보 1분
-      </dd>
-      <dt class="font-medium">
-        주차안내
-      </dt>
+      <dt class="font-medium">간략위치</dt>
+      <dd class="text-gray-500">압구정역 4번 출구 도보 1분</dd>
+      <dt class="font-medium">주차안내</dt>
       <dd class="space-y-1 text-gray-500">
         <p>발렛이용 가능</p>
         <p>주차비 지원</p>
       </dd>
-      <dt class="font-medium">
-        진료시간
-      </dt>
+      <dt class="font-medium">진료시간</dt>
       <dd class="space-y-1 text-gray-500">
         <div>월,목&nbsp;&nbsp;&nbsp;오전 10시 30분 ~ 오후 8시</div>
         <div>화,금&nbsp;&nbsp;&nbsp;오전 10시 30분 ~ 오후 7시</div>
