@@ -36,32 +36,27 @@ useSeoMeta({
 
 <template>
   <section class="relative">
-    <a
-      href="https://www.clipartkorea.co.kr/search/preview?cont_code=taim00090000447&total=&menu=m&hdn=AI%20%EB%B7%B0%E D%8B%B0%EB%AA%A8%EB%8D%B8&ska=2&sort=3&per=150&ad=off&page=1&nw=on&keyword=A1%20%EB%AA%A8%EB%8D%B8&vt=popup&popYn=Y"
-      target="_blank"
-    >
-      <video
-        src="/images/ja/bg_ch.mp4"
-        width="768px"
-        autoplay
-        loop
-        muted
-        playsinline
-        class="w-full cursor-pointer"
-      />
-      <div class="absolute bottom-12 left-6 text-black md:bottom-16 md:left-10">
-        <p class="text-xs font-light uppercase tracking-wide md:text-sm">
-          CUSTOMIZING BEAUTY SOLUTION
-        </p>
-        <h1 class="mt-1 font-serif text-3xl font-bold md:mt-2 md:text-5xl">
-          AFOR CLINIC
-        </h1>
-        <p class="mt-3 text-xs leading-relaxed md:mt-4 md:text-sm">
-          あなたの若さのために、<br />
-          エイポクリニックは完璧の基準を掲げます。
-        </p>
-      </div>
-    </a>
+    <video
+      src="/images/ja/bg_ch.mp4"
+      width="768px"
+      autoplay
+      loop
+      muted
+      playsinline
+      class="w-full"
+    />
+    <div class="absolute bottom-12 left-6 text-black md:bottom-16 md:left-10">
+      <p class="text-xs font-light uppercase tracking-wide md:text-sm">
+        CUSTOMIZING BEAUTY SOLUTION
+      </p>
+      <h1 class="mt-1 font-serif text-3xl font-bold md:mt-2 md:text-5xl">
+        AFOR CLINIC
+      </h1>
+      <p class="mt-3 text-xs leading-relaxed md:mt-4 md:text-sm">
+        あなたの若さのために、<br />
+        エイポクリニックは完璧の基準を掲げます。
+      </p>
+    </div>
   </section>
 
   <section class="bg-[#E6E7EB]">
