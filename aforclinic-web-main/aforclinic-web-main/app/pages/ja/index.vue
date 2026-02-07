@@ -7,6 +7,7 @@ definePageMeta({
 
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
+const expanded = ref(false);
 
 useSeoMeta({
   // Basic
@@ -45,7 +46,7 @@ useSeoMeta({
       playsinline
       class="w-full"
     />
-    <div class="absolute bottom-12 left-6 text-black md:bottom-16 md:left-10">
+    <div class="absolute bottom-12 left-6 text-black md:bottom-16 md:left-10" style="font-family: 'EB Garamond', serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;">
       <p class="text-xs font-light uppercase tracking-wide md:text-sm">
         CUSTOMIZING BEAUTY SOLUTION
       </p>
@@ -107,7 +108,7 @@ useSeoMeta({
       <div class="py-4">
         <img
           alt="導入機器"
-          src="/images/ja/popular-procedure_ch1.jpg"
+          src="/images/ja/popular-procedure_ch2.png"
           width="768px"
         />
       </div>
@@ -287,7 +288,7 @@ useSeoMeta({
         />
       </NuxtLink>
       <NuxtLink
-        href="https://youtube.com/channel/UCpwpQtTdCbKKRcrmoKfOehPQ?si=ieTjnKuKnTvWN7J"
+        href="https://www.youtube.com/@%EC%9D%98%EC%82%AC%EA%B4%91%EC%88%98"
         target="_blank"
         class="h-12 w-12 md:h-16 md:w-16"
       >
@@ -364,6 +365,50 @@ useSeoMeta({
       </dl>
     </div>
   </section>
+
+  <footer class="flex flex-col gap-4 bg-gray-100 p-6 md:p-8">
+    <section class="flex text-xs font-medium text-gray-700">
+      <nav class="flex gap-2">
+        <NuxtLink
+          to="/policy/terms"
+          target="_blank"
+        >
+          利用規約
+        </NuxtLink>
+        |
+        <NuxtLink
+          to="/policy/privacy"
+          target="_blank"
+        >
+          個人情報処理方針
+        </NuxtLink>
+        |
+        <button
+          type="button"
+          @click="expanded = !expanded"
+        >
+          事業者情報
+        </button>
+      </nav>
+    </section>
+    <section
+      v-if="expanded"
+      class="text-xs text-gray-700"
+    >
+      <dl class="grid grid-cols-[7rem_1fr] gap-y-2">
+        <dt>商号</dt>
+        <dd>エイポクリニック</dd>
+        <dt>代表</dt>
+        <dd>キム・グァンス</dd>
+        <dt>事業者登録番号</dt>
+        <dd>411-24-65795</dd>
+        <dt>住所</dt>
+        <dd>ソウル市 江南区 論峴路 857, A857 地下 1階(新沙洞 582-10)</dd>
+        <dt>代表番号</dt>
+        <dd><a href="tel:0261041199">02-6104-1199</a></dd>
+      </dl>
+    </section>
+  </footer>
 </template>
 
 <style lang="css" scoped>

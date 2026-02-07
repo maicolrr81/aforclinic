@@ -55,15 +55,20 @@ echo "Port: 3000"
 echo "API Server: http://localhost:9090"
 echo "Web URL: http://localhost:3000"
 echo ""
+echo "⚠️  외부 접근을 위해 --host 옵션 사용"
+echo "   서버 IP로 접근: http://서버IP:3000"
+echo ""
 echo "Press Ctrl+C to stop the server"
 echo ""
 
 # 환경변수 설정
 export NODE_ENV=development
 export NODE_OPTIONS="--max-old-space-size=4096"
+export HOST=0.0.0.0
+export PORT=3000
 
-# 개발 서버 실행
-pnpm dev
+# 개발 서버 실행 (외부 접근 허용)
+pnpm dev --host 0.0.0.0
 
 if [ $? -ne 0 ]; then
     echo ""

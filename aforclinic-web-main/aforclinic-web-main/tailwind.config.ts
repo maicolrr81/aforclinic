@@ -11,6 +11,9 @@ export default {
       colors: {
         primary: '#f9fafb',
       },
+      fontFamily: {
+        serif: ['EB Garamond', 'Georgia', 'serif'],
+      },
     },
   },
   plugins: [
