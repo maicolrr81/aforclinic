@@ -12,9 +12,14 @@ const navs = computed<{
   onClick?: () => void;
 }[]>(() => [
       {
-        label: `이벤트`,
-        to: `/events`,
+        label: `공지사항&이벤트`,
+        to: `/boards`,
       },
+      // 3월 6일 요청으로 주석 처리
+      // {
+      //   label: `이벤트`,
+      //   to: `/events`,
+      // },
       {
         label: `전체시술`,
         to: `/procedures`,
@@ -33,10 +38,6 @@ const navs = computed<{
       {
         label: `카드사별 무이자 할부 혜택`,
         to: `/card-installments`,
-      },
-      {
-        label: `게시판`,
-        to: `/boards`,
       },
       {
         label: `병원소개`,
